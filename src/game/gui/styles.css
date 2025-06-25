@@ -1,0 +1,24 @@
+
+
+@font-face {
+    font-family: 'Ditty';
+    src: url('file:./src/game/gui/contentNeeded/fonts/Ditty-Rp72W.ttf');
+}
+
+@font-face {
+    font-family: 'dutch';
+    src: url('file:./src/game/gui/contentNeeded/fonts/DutchBrigade.ttf');
+}
+
+/* Apply font to all buttons */
+.button {
+    -fx-font-family: 'Ditty';
+}
+
+.button {
+    -fx-font-family: "dutch" ;
+    }
+    
+
+
+
