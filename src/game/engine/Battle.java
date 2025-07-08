@@ -26,7 +26,7 @@ public class Battle
 		{ 2, 2, 2, 1, 3, 3, 4 },
 		{ 4, 4, 4, 4, 4, 4, 4 } 
 	}; // order of the types of titans (codes) during each phase
-	private static final int WALL_BASE_HEALTH = 100	;
+	private static final int WALL_BASE_HEALTH = 10000 ;
 
 	private int numberOfTurns;
 	private IntegerProperty resourcesProperty = new SimpleIntegerProperty();
