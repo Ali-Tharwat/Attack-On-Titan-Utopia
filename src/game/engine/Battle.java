@@ -26,7 +26,7 @@ public class Battle
 		{ 2, 2, 2, 1, 3, 3, 4 },
 		{ 4, 4, 4, 4, 4, 4, 4 } 
 	}; // order of the types of titans (codes) during each phase
-	private static final int WALL_BASE_HEALTH = 10000;
+	private static final int WALL_BASE_HEALTH = 100	;
 
 	private int numberOfTurns;
 	private IntegerProperty resourcesProperty = new SimpleIntegerProperty();
@@ -217,22 +217,37 @@ public class Battle
 		performTurn();
 	}
 
-	private void addTurnTitansToLane()
-	{
-		Lane leastDangerLane = this.getLanes().poll();
+	private void addTurnTitansToLane() {
+	    // Retrieve the lane with the least danger or null if no lanes exist
+	    Lane leastDangerLane = this.getLanes().poll();
 
-		for (int i = 0; i < this.getNumberOfTitansPerTurn(); i++)
-		{
-			if (this.getApproachingTitans().isEmpty())
-			{
-				this.refillApproachingTitans();
-			}
+	    // Check if the retrieved lane is null (no lanes available)
+	    if (leastDangerLane == null) {
+	        // Possibly handle the case where there are no lanes left
+	        System.out.println("No lanes available to add Titans to.");
+	        return; // Exit the method to prevent NullPointerException
+	    }
 
-			leastDangerLane.addTitan(this.getApproachingTitans().remove(0));
-		}
+	    // Process the number of titans that should be added per turn
+	    for (int i = 0; i < this.getNumberOfTitansPerTurn(); i++) {
+	        // Check if there are no approaching Titans and refill if necessary
+	        if (this.getApproachingTitans().isEmpty()) {
+	            this.refillApproachingTitans();
+	            // After refilling, check again to avoid adding null Titans
+	            if (this.getApproachingTitans().isEmpty()) {
+	                System.out.println("No Titans available to add after refill.");
+	                break; // Break the loop if still no Titans available
+	            }
+	        }
 
-		this.getLanes().add(leastDangerLane);
+	        // Safely add a Titan from the list of approaching Titans
+	        leastDangerLane.addTitan(this.getApproachingTitans().remove(0));
+	    }
+
+	    // Re-add the lane back to the queue after processing
+	    this.getLanes().add(leastDangerLane);
 	}
+
 
 	private void moveTitans()
 	{

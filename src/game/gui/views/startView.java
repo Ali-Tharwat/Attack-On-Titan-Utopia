@@ -49,6 +49,16 @@ public class startView {
          } ) ;
      
      Button hardButton = createStyledButton("HARD", buttonStyle) ;
+     hardButton.setOnAction(event ->{
+     	
+ 		try { StartHard hard = new StartHard();
+ 			 hardButton.getScene().setRoot(hard.getRoot());
+ 		} catch (Exception e) {
+ 			// TODO Auto-generated catch block
+ 			e.printStackTrace();
+ 		}
+         
+          } ) ;
      
      
      Button back = createStyledButton("Exit to Main Menu", buttonStyle) ;

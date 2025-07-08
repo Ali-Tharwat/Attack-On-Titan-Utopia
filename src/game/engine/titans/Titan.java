@@ -10,8 +10,8 @@ public abstract class Titan implements Attacker, Attackee, Mobil, Comparable<Tit
 	private int currentHealth;
 	private final int baseDamage;
 	private final int heightInMeters;
-	private int distanceFromBase;
-	private int speed; // distance moved per turn
+	private double distanceFromBase;
+	private double speed; // distance moved per turn
 	private final int resourcesValue; // resources gained by defeating it
 	private final int dangerLevel;
 
@@ -58,27 +58,27 @@ public abstract class Titan implements Attacker, Attackee, Mobil, Comparable<Tit
 	}
 
 	@Override
-	public int getDistance()
+	public double getDistance()
 	{
 		return this.distanceFromBase;
 	}
 
 	@Override
-	public void setDistance(int distance)
+	public void setDistance(double distance)
 	{
 		this.distanceFromBase = distance < 0 ? 0 : distance;
 	}
 
 	@Override
-	public int getSpeed()
+	public double getSpeed()
 	{
 		return this.speed;
 	}
 
 	@Override
-	public void setSpeed(int speed)
+	public void setSpeed(double d)
 	{
-		this.speed = speed;
+		this.speed = d;
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public abstract class Titan implements Attacker, Attackee, Mobil, Comparable<Tit
 	@Override
 	public int compareTo(Titan o) // prioritizing the nearest titans according to the wall
 	{
-		return this.distanceFromBase - o.distanceFromBase;
+		return (int) (this.distanceFromBase - o.distanceFromBase);
 	}
 	public abstract int getTypeCode(); // Ensure this is implemented in all subclasses
 }

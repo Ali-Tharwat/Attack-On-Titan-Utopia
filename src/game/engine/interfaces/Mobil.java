@@ -2,13 +2,13 @@ package game.engine.interfaces;
 
 public interface Mobil
 {
-	int getDistance();
+	double getDistance();
 
-	void setDistance(int distance);
+	void setDistance(double distance);
 
-	int getSpeed();
+	double getSpeed();
 
-	void setSpeed(int speed);
+	void setSpeed(double speed);
 
 	default boolean hasReachedTarget() // returns true if arrived at the intended target
 	{

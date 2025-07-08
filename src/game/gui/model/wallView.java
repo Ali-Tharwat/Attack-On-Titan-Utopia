@@ -14,53 +14,55 @@ import game.engine.lanes.Lane;
 
 public class wallView {
 	private Wall wall ;
-	 private ProgressBar healthBar = new ProgressBar();
-	    private Text healthText = new Text();
+	private StackPane stackPane ;
+	 private ProgressBar healthBar ;
+	    private Text healthText ;
+	    private double x ;
 	
-	public wallView(Wall wall) {
-        this.wall = wall;
-        updateHealth();
-    }
+	    public wallView(Wall wall, double X) {
+	        this.wall = wall;
+	        x = X ;
+	        createView();  // Make sure createView setups everything correctly
+	        updateHealth();  // Initial health update
+	    }
 	
 	public Wall getWall() {
 		return wall;
 	}
 
-	public Node getView() {
-		 // Create a StackPane to hold the wall rectangle, health bar, and health text
-       StackPane stackPane = new StackPane();
-       
-       // Create a Rectangle as the graphical representation of the wall
-		 Rectangle wallSQUARE = new Rectangle(550 , 550);
-		    Image wallImage = new Image("file:./src//game//gui//contentNeeded//images/wall.png");
-		    ImagePattern imagePattern = new ImagePattern(wallImage);
-		    wallSQUARE.setFill(imagePattern); // Set image
-       
-       
-		 // Create a ProgressBar to represent the health bar
-	        ProgressBar healthBar = new ProgressBar();
-	        healthBar.setPrefWidth(135); // Set width equal to the wall side length
-	        healthBar.setProgress((double) wall.getCurrentHealth() / wall.getBaseHealth()); // Set progress based on health percentage
-	        healthBar.setStyle("-fx-accent: green;"); // Set progress color to green
-	        healthBar.setTranslateX(-50);healthBar.setTranslateY(-220);
+	private void createView() {
+        stackPane = new StackPane();
 
-	        // Create a Text node to display the current health value
-	        Text healthText = new Text(String.valueOf(wall.getCurrentHealth()));
-	        healthText.setFill(Color.BLACK);
-	        healthText.setTranslateX(-50);healthText.setTranslateY(-220);
-	        healthText.setFont(Font.font(40));
-	        
-	        
-	     // Add the wall rectangle, health bar, and health text to the StackPane
-	        stackPane.getChildren().addAll(wallSQUARE, healthBar, healthText);
-	        updateHealth();
-	        return stackPane;
-   }
-	
-	public void updateHealth() {
-        healthBar.setProgress(wall.getCurrentHealth() / (double) wall.getBaseHealth());
-        healthText.setText("" + wall.getCurrentHealth() );
+        Rectangle wallSquare = new Rectangle(550/x, 550/x);
+        Image wallImage = new Image("file:./src/game/gui/contentNeeded/images/wall.png");
+        ImagePattern imagePattern = new ImagePattern(wallImage);
+        wallSquare.setFill(imagePattern);
+
+        // Create a ProgressBar to represent the health bar
+        healthBar = new ProgressBar();
+        healthBar.setPrefWidth(135/x); // Set width equal to the wall side length
+        healthBar.setProgress((double) wall.getCurrentHealth() / wall.getBaseHealth()); // Set progress based on health percentage
+        healthBar.setStyle("-fx-accent: green;"); // Set progress color to green
+        healthBar.setTranslateX(-50/x);healthBar.setTranslateY(-220/x);
+
+        // Create a Text node to display the current health value
+        healthText = new Text(String.valueOf(wall.getCurrentHealth()));
+        healthText.setFill(Color.BLACK);
+        healthText.setTranslateX(-50/x);healthText.setTranslateY(-220/x);
+        healthText.setFont(Font.font(40/x));
+
+        stackPane.getChildren().addAll(wallSquare, healthBar, healthText);
     }
+	
+	 public void updateHealth() {
+	        double progress = (double) wall.getCurrentHealth() / wall.getBaseHealth();
+	        healthBar.setProgress(progress);
+	        healthText.setText("" + wall.getCurrentHealth());
+	    }
+
+	public StackPane getView() {
+		return stackPane;
+	}
 	
 	
 	

@@ -36,4 +36,8 @@ public class PiercingCannon extends Weapon
 		return attackRes;
 	}
 
+	public int getWeaponCode() {
+		return WEAPON_CODE;
+	}
+
 }

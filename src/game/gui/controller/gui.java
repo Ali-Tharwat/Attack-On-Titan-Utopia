@@ -14,7 +14,13 @@ import javafx.stage.Window;
 public class gui extends Application{
 	
 	private gameOpen GameOpen = new gameOpen();
+	private gameStart GameStart  = new gameStart();;
 	
+
+	private startView start = new startView();
+	private descriptionView description = new descriptionView();
+	private settingsView settings = new settingsView();
+	private creditsView credits  = new creditsView();
 	
 	private Stage stage;
 	private Scene s ;

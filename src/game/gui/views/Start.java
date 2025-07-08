@@ -4,6 +4,8 @@ import javafx.scene.Parent;
 import game.engine.Battle;
 import game.engine.exceptions.InvalidLaneException;
 import game.engine.lanes.Lane;
+import game.gui.model.laneView;
+
 
 public abstract class Start {
 	private Battle battle ;
@@ -28,6 +30,9 @@ public abstract class Start {
 	} 
 	
 	public abstract Parent getRoot() ;
+
+	
+	public abstract laneView findLaneView(Lane lane) ;
 	
 	
 	

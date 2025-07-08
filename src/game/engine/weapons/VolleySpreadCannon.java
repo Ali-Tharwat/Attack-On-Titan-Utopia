@@ -54,4 +54,8 @@ public class VolleySpreadCannon extends Weapon
 		return attackRes;
 	}
 
+	public int getWeaponCode() {
+		return WEAPON_CODE;
+	}
+
 }

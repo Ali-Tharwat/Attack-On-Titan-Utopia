@@ -11,9 +11,11 @@ import java.io.IOException;
 
 
 
+
 import game.engine.exceptions.InsufficientResourcesException;
 import game.engine.exceptions.InvalidLaneException;
 import game.engine.lanes.Lane;
+import game.gui.model.laneView;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -71,9 +73,6 @@ public class weaponShopView   {
 	     		+ " -fx-effect: dropshadow( gaussian  , black , 10 , 1 , 2 , 0 )" );
 	     back.setOnAction(event ->{
 	    	 back.getScene().setRoot(start.getRoot());
-			
-			
-	     	
 	         } ) ; 
 	     back.setTranslateX(1270); back.setTranslateY(1300);
 	     
@@ -108,9 +107,19 @@ public class weaponShopView   {
 		if (start != null) { // Add null check for start object
 	        Purchase.setOnAction(event -> {
 	            try {
-	                start.getBattle().purchaseWeapon(code, start.getLaneFromIndex(start.getSelectedLaneIndex()) );
+	            	Lane lane = start.getLaneFromIndex(start.getSelectedLaneIndex());
+	                start.getBattle().purchaseWeapon(code, lane);
 	                
+	                // Update resources label immediately
 	                resources.setText("Current Resources : " + start.getBattle().getResourcesGathered());
+
+	                // Update lane view to reflect new weapon
+	                laneView laneViewToUpdate = start.findLaneView(lane); // You need a method to get the correct laneView
+	                laneViewToUpdate.updateWeaponsDisplay();
+
+	                // Assuming you switch back to the main view, ensure it's refreshed.
+	                Purchase.getScene().setRoot(start.getRoot());
+	                
 	            } catch (Exception e) {
 	            	Platform.runLater(() -> {
 	            		 Stage popupStage = new Stage();

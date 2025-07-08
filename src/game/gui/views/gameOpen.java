@@ -16,6 +16,7 @@ import javafx.util.Duration;
 
 public class gameOpen {
     private VBox root;
+    private boolean isKeyListenerActive = false; // Control flag for key listener
 
     public gameOpen() {
         root = new VBox();
@@ -26,36 +27,26 @@ public class gameOpen {
                 BackgroundSize.DEFAULT);
         root.setBackground(new Background(myBI));
 
-        // Make sure the pane can receive keyboard focus
-        root.setFocusTraversable(true);
+        root.setFocusTraversable(true); // Make sure the pane can receive keyboard focus
 
-        // Main title
         Text titleMain = new Text("Attack On Titan:");
         titleMain.setFill(Color.GAINSBORO);
-        titleMain.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 300; -fx-background-color: transparent;"
-         		+ " -fx-effect: dropshadow( gaussian  , black , 10 , 1 , 2 , 0 )" );
+        titleMain.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 300; -fx-background-color: transparent; -fx-effect: dropshadow( gaussian  , black , 10 , 1 , 2 , 0 )");
         titleMain.setTranslateY(-120);
 
-        // Subtitle for animated display
         Text titleSub = new Text("");
-        titleSub.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 270; -fx-fill: firebrick ; -fx-background-color: transparent;"
-         		+ " -fx-effect: dropshadow( gaussian  , black , 10 , 1 , 2 , 0 )" );
+        titleSub.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 270; -fx-fill: firebrick; -fx-background-color: transparent; -fx-effect: dropshadow( gaussian  , black , 10 , 1 , 2 , 0 )");
         titleSub.setTranslateY(-190);
         titleSub.setOpacity(0); // Start invisible
-       
 
-        // Label setup
         Label label = new Label("Press Any Button To Start");
-        label.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 150 ; -fx-background-color: transparent;"
-         		+ " -fx-effect: dropshadow( gaussian  , black , 4 , 1 , 2 , 0 )" );
-      label.setTextFill(Color.WHITESMOKE);
-      label.setTranslateY(60);
+        label.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 150; -fx-background-color: transparent; -fx-effect: dropshadow( gaussian  , black , 4 , 1 , 2 , 0 )");
+        label.setTextFill(Color.WHITESMOKE);
+        label.setTranslateY(60);
         label.setOpacity(0); // Start invisible
 
-        // Adding children to root
         root.getChildren().addAll(titleMain, titleSub, label);
 
-        // Animation for title appearance
         ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(1), titleMain);
         scaleTransition.setFromX(0.5);
         scaleTransition.setFromY(0.5);
@@ -63,12 +54,11 @@ public class gameOpen {
         scaleTransition.setToY(1.0);
         scaleTransition.setCycleCount(2);
 
-        // Sequential appearance of "UTOPIA"
-        String utopia = "UTOPIA";
+        String utopia = "Utopia";
         SequentialTransition sequentialTransition = new SequentialTransition();
         for (int i = 0; i < utopia.length(); i++) {
             final int index = i;
-            PauseTransition pause = new PauseTransition(Duration.seconds(0.5 ));
+            PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
             pause.setOnFinished(e -> {
                 titleSub.setText(utopia.substring(0, index + 1));
                 titleSub.setOpacity(1.0); // Make visible
@@ -76,7 +66,6 @@ public class gameOpen {
             sequentialTransition.getChildren().add(pause);
         }
 
-        // Fade transition for label
         FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), label);
         fadeTransition.setFromValue(0);
         fadeTransition.setToValue(1);
@@ -84,19 +73,22 @@ public class gameOpen {
         fadeTransition.setAutoReverse(true);
 
         scaleTransition.setOnFinished(e -> sequentialTransition.play());
-        sequentialTransition.setOnFinished(e -> fadeTransition.play());
+        sequentialTransition.setOnFinished(e -> {
+            fadeTransition.play();
+            isKeyListenerActive = true; // Enable key listener after label is visible
+        });
 
         scaleTransition.play();
 
-        // Key press handling
         root.setOnKeyPressed(event -> handleKeyPress(event));
     }
 
     private void handleKeyPress(KeyEvent event) {
-        KeyCode keyCode = event.getCode();
-        // Navigate to gameStart view on any key press
-        gameStart menu = new gameStart();
-        root.getScene().setRoot(menu.getRoot());
+        if (isKeyListenerActive) {  // Check if the listener should respond
+            KeyCode keyCode = event.getCode();
+            gameStart menu = new gameStart();
+            root.getScene().setRoot(menu.getRoot());
+        }
     }
 
     public Parent getRoot() {

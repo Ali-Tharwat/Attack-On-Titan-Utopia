@@ -32,4 +32,8 @@ public class SniperCannon extends Weapon
 		return resourcesGathered;
 	}
 
+	public int getWeaponCode() {
+		return WEAPON_CODE;
+	}
+
 }

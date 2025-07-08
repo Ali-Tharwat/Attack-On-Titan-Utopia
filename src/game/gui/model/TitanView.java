@@ -2,6 +2,7 @@ package game.gui.model;
 
 import game.engine.titans.ColossalTitan;
 import game.engine.titans.Titan;
+import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -9,13 +10,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 public class TitanView {
+	
 	private Titan titan;
     private VBox viewContainer;
     private ImageView titanImage;
     private Text infoText;
-
-    public TitanView(Titan titan) {
+    private double x ;
+    public TitanView(Titan titan,double X) {
         this.titan = titan;
+        titan.setSpeed(titan.getSpeed()*1.2);
+        x = X ;
         createView();
     }
 
@@ -26,17 +30,16 @@ public class TitanView {
         // Set up the image view for the titan
         titanImage = new ImageView();
         titanImage.setImage(mapTitanImage(titan));
-        titanImage.setFitHeight(titan.getHeightInMeters()*10) ; // Set the display size
-        titanImage.setFitWidth(200);
-        if(titan instanceof ColossalTitan){
-        	 titanImage.setFitWidth(500);
-        }
+        titanImage.setFitHeight(titan.getHeightInMeters()*8/x) ; // Set the display size
+        titanImage.setPreserveRatio(true);
+       
 
         // Info text could display additional data like health or type
         infoText = new Text("Health: " + titan.getCurrentHealth());
        // System.out.print(("Health: " + titan.getCurrentHealth()));
 
         viewContainer.getChildren().addAll(infoText,titanImage );
+        viewContainer.setAlignment(Pos.BOTTOM_CENTER);
         updateView();
     }
 

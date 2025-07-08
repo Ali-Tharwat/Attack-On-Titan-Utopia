@@ -32,4 +32,8 @@ public class WallTrap extends Weapon
 		return resourcesGathered;
 	}
 
+	public int getWeaponCode() {
+		return WEAPON_CODE;
+	}
+
 }

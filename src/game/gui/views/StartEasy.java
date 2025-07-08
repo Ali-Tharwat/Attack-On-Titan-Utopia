@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
@@ -19,7 +21,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import game.engine.Battle;
+import game.engine.exceptions.InsufficientResourcesException;
 import game.engine.exceptions.InvalidLaneException;
 import game.engine.lanes.Lane;
 import game.engine.titans.Titan;
@@ -33,16 +39,20 @@ import game.gui.model.wallView;
 	private Battle battle  ;
 	 
 	private int selectedLaneIndex ;
+	
+	private Button WeaponShop ;
+	private boolean canVisitWeaponShop = true;
+	
 	private BorderPane root ;
 	
 	private HBox infoBox ;
 	private VBox lanes ;
-	
-	private VBox titans ;
+	private Button StartGame;
+
 	
 	private ArrayList<laneView> laneViews = new ArrayList<>();
 	
-	private ArrayList<TitanView> titanViews = new ArrayList<>();
+	
 	
     private StackPane layeredPane;
     
@@ -54,7 +64,7 @@ import game.gui.model.wallView;
 	
     
 	public StartEasy() throws IOException{
-		 battle  = new Battle(1,0,2500,3,250) ;
+		 battle  = new Battle(1,0,2000,3,250) ;
 		selectedLaneIndex = 2;
 		super.setBattle(battle);
 		weaponShopView weaponShop = new weaponShopView(this);
@@ -68,7 +78,7 @@ import game.gui.model.wallView;
 	 // Call updateLaneSelection after UI setup
 	  
 	    initializeUI() ;
-	    initializeGame(); 
+	   
 	    super.setSelectedLaneIndex(selectedLaneIndex);
 		 root.setOnKeyPressed(event -> handleKeyPress(event));
 	}
@@ -82,20 +92,12 @@ import game.gui.model.wallView;
 
         lanes = createLanesView();
         root.setCenter(lanes);
-        
-        
-        //titans = createTitansView();
-      //  root.getChildren().add(titans);
-       // titans.setAlignment(Pos.TOP_RIGHT);
+       
         
     } 
 	
 	
-	private void initializeGame() {
-	// Ensure titans are initialized in the battle
-        updateLaneViews(); // Create visual representation of lanes 
-        
-	}
+	
 	
 	
 	
@@ -113,6 +115,7 @@ import game.gui.model.wallView;
 	        }
 	    }
 	
+	 
 	 // for selected lane  to be updated
 	 private void updateLaneSelection(boolean markSelected) {
 		    // Reset the visual state of all lanes to not selected
@@ -125,6 +128,7 @@ import game.gui.model.wallView;
 		        laneViews.get(selectedLaneIndex -1).setSelected(true); // Array indexing starts at 0, lane indexing starts at 1
 		    }
 		}
+
 	 
 	 private void handleKeyPress(KeyEvent event) {
 		    KeyCode keyCode = event.getCode();
@@ -145,20 +149,12 @@ import game.gui.model.wallView;
 		            break;
 		        case S:
 		            battle.passTurn(); // Simulate the "Start" button action
-		            createTitansView();
+		           // createTitansView();
 		            updateTurnLabel();
 		            updatePhaseLabel();
 		            updateScoreLabel();
 		            break;
-		        case W:
-		            try {
-		                weaponShopView weapon = new weaponShopView(this);
-		                weapon.setStart(this);
-		                root.getScene().setRoot(weapon.getRoot()); // Simulate the "Weapon Shop" button action
-		            } catch (Exception e) {
-		                e.printStackTrace();
-		            }
-		            break;
+		       
 		        case ESCAPE:
 		            gameStart menu = new gameStart(); // Simulate the "Exit to Main Menu" button action
 		            root.getScene().setRoot(menu.getRoot());
@@ -174,10 +170,13 @@ import game.gui.model.wallView;
 		            break;
 		    }
 		}
+
+
 	
 	 public void setSelectedLaneIndex(int selectedLaneIndex) {
 			this.selectedLaneIndex = selectedLaneIndex;
 		}
+
 
 		
 	 private void updateSelectedLaneLabel() {
@@ -185,58 +184,66 @@ import game.gui.model.wallView;
 		}
  
 	 // creating InfoBox
+	 
     private HBox createInfoBox() {
     	HBox infoBox = new HBox();
-    	infoBox.setAlignment(Pos.CENTER);
+    	
         infoBox.setSpacing(10);
         infoBox.setStyle("-fx-background-color:  black;");
         
-        Button StartGame = new Button("Start ");  StartGame.setTranslateY(-10);
-        StartGame.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 65; -fx-text-fill: white ; -fx-background-color: transparent;"
+        StartGame = new Button("Start ");  StartGame.setTranslateY(-10);
+        StartGame.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 65; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" );
         StartGame.setOnAction(event ->{battle.passTurn();
-                                       createTitansView(); 
+       
+        								updateUI();
                                        updateTurnLabel();
                                        updatePhaseLabel(); 
-                                       updateScoreLabel();}); 
+                                       updateScoreLabel();
+                                       canVisitWeaponShop = true;  // Re-enable weapon shop visit after "Start" is clicked
+                                       updateButtonStates();  // Update button states 
+                                       checkAndDisplayGameOver();
+                                       });
 
         // Add labels for score, turn, phase, etc.
         scoreLabel = new Label("Current Score: " + battle.getScore() );
-        scoreLabel.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: white ; -fx-background-color: transparent;"
+        scoreLabel.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" );
         
         turnLabel = new Label("Current Turn: " + battle.getNumberOfTurns());
-        turnLabel.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: white ; -fx-background-color: transparent;"
+        turnLabel.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" );
        
         phaseLabel = new Label("Current Phase : " + battle.getBattlePhase());
-        phaseLabel.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: white ; -fx-background-color: transparent;"
+        phaseLabel.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" );
        
         resourcesLabel = new Label();
         resourcesLabel.textProperty().bind(battle.resourcesProperty().asString("Current Resources: %d"));
-        resourcesLabel.setStyle("-fx-font-family: 'dutch'; -fx-font-size: 35; -fx-text-fill: white; -fx-background-color: transparent; -fx-effect: dropshadow(gaussian, black, 5, 1, 2, 0)");
+        resourcesLabel.setStyle("-fx-font-family: 'dutch'; -fx-font-size: 35; -fx-text-fill: darkgreen; -fx-background-color: transparent; -fx-effect: dropshadow(gaussian, black, 5, 1, 2, 0)");
 
         selectedLane = new Label("Selected Lane : " +  this.getSelectedLaneIndex());
-        selectedLane.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: white ; -fx-background-color: transparent;"
+        selectedLane.setStyle("-fx-font-family: 'fantasy'; -fx-font-size: 35; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" );
         
         
-        Button WeaponShop = new Button("Weapon Shop ");  WeaponShop.setTranslateY(-10);
-        WeaponShop.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 65; -fx-text-fill: white ; -fx-background-color: transparent;"
+         WeaponShop = new Button("Weapon Shop ");  WeaponShop.setTranslateY(-10);
+        WeaponShop.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 65; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" );
         WeaponShop.setOnAction(event -> {
             try {
                 weaponShopView weapon = new weaponShopView(this);
                 weapon.setStart(this);
                 WeaponShop.getScene().setRoot(weapon.getRoot());
+                canVisitWeaponShop = false;  // Disable visiting again until "Start" is clicked
+                updateButtonStates();  // Update button states
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
         
         Button back = new Button("Exit to Main Menu") ;
-        back.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 70; -fx-text-fill: white ; -fx-background-color: transparent;"
+        back.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 70; -fx-text-fill: darkgreen ; -fx-background-color: transparent;"
         		+ " -fx-effect: dropshadow( gaussian  , black , 5 , 1 , 2 , 0 )" ); back.setTranslateY(-10);
         back.setOnAction(event ->{
         	gameStart menu = new gameStart();
@@ -244,19 +251,19 @@ import game.gui.model.wallView;
             } ) ;
        
      
-        infoBox.getChildren().addAll(StartGame, turnLabel, phaseLabel, resourcesLabel,selectedLane, scoreLabel, WeaponShop, back);
+        infoBox.getChildren().addAll(StartGame,WeaponShop, turnLabel, phaseLabel, resourcesLabel,selectedLane, scoreLabel,  back);
         return infoBox;
     }
 
     // for lanes graphical representation
     private VBox createLanesView() {
         VBox lanesBox = new VBox();
-       lanesBox.setSpacing(5);
+       lanesBox.setSpacing(0);
        lanesBox.setTranslateX(-10);
         lanesBox.setAlignment(Pos.CENTER);
 
         for (Lane lane : battle.getLanes()) {
-            laneView laneView = new laneView(lane);
+            laneView laneView = new laneView(lane,1, battle.getTitanSpawnDistance());
             Node view = laneView.getView();  // Ensure getView() is not returning null
             if (view != null) {
                 laneViews.add(laneView);
@@ -270,11 +277,6 @@ import game.gui.model.wallView;
     }
     
     
-    private void updateLaneViews() {
-        for (laneView LaneView : laneViews) {
-            LaneView.updateView(); // Refresh the visual components of each lane
-        }
-    }
     
     private void updateTurnLabel() {
         turnLabel.setText("Current Turn: " + battle.getNumberOfTurns()); // Update label text to reflect new turn count
@@ -288,38 +290,32 @@ import game.gui.model.wallView;
     }
     private void updateUI() {
 	    for (laneView lv : laneViews) {
-	        lv.updateVisuals(); // Now safe to call, since visuals should be initialized
+	    	lv.updateTitansDisplay();  
+	       lv.updateLaneInfo();
+	       lv.updateWeaponsDisplay();
+	    	lv.updateVisuals();
+	    	lv.updateWallHealth();// Now safe to call, since visuals should be initialized
 	    }
     }
     
-    
-    
-    private void createTitansView(){
-    	
-    	VBox titansBox = new VBox(20) ;
-    	int X = 600 ;
-    	titansBox.setTranslateY(X);
-    	titansBox.setTranslateX(battle.getTitanSpawnDistance());
-    	TitanView titanv ;
-    	
-    	for (Lane lane : battle.getLanes()) {
-    		titansBox.setTranslateY(X-200);
-    		for (Titan titan : lane.getTitans() ){
-          titanv = new TitanView(titan);  // Assume wall size matches lane
-           titanViews.add(titanv);
-           titansBox.getChildren().add(titanv.getView());
-         	
-           
-          // root.getChildren().add(titanv.getView());
-           //titanv.getView().setAlignment(Pos.TOP_RIGHT);
-       	//return titansBox ;
+    private void updateButtonStates() {
+    	WeaponShop.setDisable(!canVisitWeaponShop);
+        if (!canVisitWeaponShop) {
+        	WeaponShop.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 65; -fx-text-fill: gainsboro ; -fx-background-color: transparent; -fx-effect: dropshadow(gaussian, black, 5, 1, 2, 0);");
+        } else {
+        	WeaponShop.setStyle("-fx-font-family: 'Ditty'; -fx-font-size: 65; -fx-text-fill: darkgreen ; -fx-background-color: transparent; -fx-effect: dropshadow(gaussian, black, 5, 1, 2, 0);");
         }
-    	}
-    	root.getChildren().add(titansBox);
-   
-    //titansBox.setAlignment(Pos.TOP_RIGHT);
-    	//return titansBox ;
     }
+    
+    
+    
+    public laneView findLaneView(Lane lane) {
+        return laneViews.stream()
+                        .filter(lv -> lv.getLane().equals(lane))
+                        .findFirst()
+                        .orElse(null); // Return null or handle if no laneView is found
+    }
+
     
 	public BorderPane getRoot() {
 		return root;
@@ -343,7 +339,39 @@ import game.gui.model.wallView;
 	public int getSelectedLaneIndex() {
 		return selectedLaneIndex;
 	}
+	
+	private void checkAndDisplayGameOver() {
+	    if (battle.isGameOver()) {
+	        showGameOverPopup();
+	        gameStart menu = new gameStart();
+	        StartGame.getScene().setRoot(menu.getRoot());
+	        
+	    }
+	}
+	
+	private void showGameOverPopup() {
+	    // Create a new stage for the popup
+	    Stage popupStage = new Stage();
+	    popupStage.initModality(Modality.APPLICATION_MODAL); // Make the popup modal
+	    popupStage.setTitle("Game Over");
 
-	
-	
+	    // Create a layout and add components
+	    VBox popupLayout = new VBox(20);
+	    popupLayout.setAlignment(Pos.CENTER);
+	    popupLayout.setPadding(new Insets(10));
+
+	    Label messageLabel = new Label("Game Over! All lanes have been destroyed. \n Your Score is: " + battle.getScore());
+	    messageLabel.setFont(new Font("Arial", 40));
+
+	    Button closeButton = new Button("Close");
+	    closeButton.setOnAction(e -> popupStage.close());
+
+	    popupLayout.getChildren().addAll(messageLabel, closeButton);
+
+	    // Set the scene and show the stage
+	    Scene popupScene = new Scene(popupLayout, 900, 400);
+	    popupStage.setScene(popupScene);
+	    popupStage.showAndWait();
+	}
+
  }
